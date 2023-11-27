@@ -27,10 +27,14 @@ int splitInput(char *input, char **command) {
 }
 
 int setPoint(char *board, int x, int y, int setX, int setY) {
+
 	if (setX < 0 || setX >= x || setY < 0 || setY >= y) return -1;
 	*(board + setX * y + y - setY - 1) = (*(board + setX * y + y - setY - 1) + 1) % 2;
 
-	// addElement(board + setX * y + setY, cells);
+	if (*(board + setX * y + y - setY - 1))
+		addElement(board + setX * y + y - setY - 1, cells);
+	else
+		return (int) removeElement(board + setX * y + y - setY - 1, cells);
 
 	return 0;
 }
@@ -217,14 +221,14 @@ void setShattle(char *board, int x, int y, int posX, int posY) {
 	if (posX < 0 || posX >= x || posY < 0 || posY >= y)
 		return;
 	setPoint(board, x, y, posX, posY);
-	setPoint(board, x, y, posX, posY + 1);
-	setPoint(board, x, y, posX, posY + 2);
-	setPoint(board, x, y, posX - 1, posY + 3);
-	setPoint(board, x, y, posX - 1, posY);
-	setPoint(board, x, y, posX - 2, posY);
-	setPoint(board, x, y, posX - 3, posY);
-	setPoint(board, x, y, posX - 4, posY + 1);
-	setPoint(board, x, y, posX - 4, posY + 3);
+	setPoint(board, x, y, posX, (posY + 1) % y);
+	setPoint(board, x, y, posX, (posY + 2) % y);
+	setPoint(board, x, y, (posX - 1) % x, (posY + 3) % y);
+	setPoint(board, x, y, (posX - 1) % x, posY);
+	setPoint(board, x, y, (posX - 2) % x, posY);
+	setPoint(board, x, y, (posX - 3) % x, posY);
+	setPoint(board, x, y, (posX - 4) % x, (posY + 1) % y);
+	setPoint(board, x, y, (posX - 4) % x, (posY + 3) % y);
 }
 
 

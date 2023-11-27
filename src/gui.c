@@ -163,6 +163,9 @@ int main(int argc, char *argv[]) {
     paused = 1;
 
     values = readConfig("./data/config.conf");
+
+    ASSERT(values[0] % values[3] == 0 && values[1] % values[2] == 0);
+
     cells = createList();
 
 

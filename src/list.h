@@ -24,6 +24,7 @@ struct list *createList();
 void removeList(struct list *list);
 
 bool addElement(void *data, struct list *list);
+bool removeElement(void *data, struct list *list);
 int getListLength(struct list *list);
 
 /* Functions for working with a string based on the list */

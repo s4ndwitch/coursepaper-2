@@ -69,6 +69,30 @@ bool addElement(void *data, struct list *list) {
 }
 
 /*
+    Removes an element with given data from given list.
+    In case it has only one element, turns it data into NULL.
+*/
+bool removeElement(void *data, struct list *list) {
+    struct list *cur = list, *prev = NULL;
+    while (cur->nextElement != NULL && data) {
+        prev = cur;
+        cur = cur->nextElement;
+    }
+    
+    if (cur->data != data)
+        return false;
+
+    if (prev == NULL)
+        cur->data = NULL;
+    else {
+        prev->nextElement = cur->nextElement;
+        free(cur);
+    }
+
+    return true;
+}
+
+/*
     Returns the number of elements in given list.
 */
 int getListLength(struct list *list) {

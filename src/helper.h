@@ -13,7 +13,7 @@
         exit(-1);                                          \
     }
 
-typedef enum bool {true, false} bool;
+typedef enum bool {false, true} bool;
 
 
 int parseInt(char *number);
