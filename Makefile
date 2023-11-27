@@ -1,4 +1,5 @@
-# GUI_LIBRARIES = gl glfw3 glew
+
+
 GUI_LIBRARIES = gl glu glut
 GUI_FLAGS := $(shell for flag in `pkg-config --libs $(GUI_LIBRARIES)`;\
 	do echo $$flag; done)
@@ -35,3 +36,4 @@ build/list.o:
 
 build/helper.o:
 	$(CC) -o build/helper.o -c src/helper.c
+

@@ -2,9 +2,12 @@
 #include <GL/glut.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
 
 #include "config.h"
 #include "board.h"
+#include "list.h"
 
 int tickTime;
 int paused;
@@ -21,10 +24,10 @@ void syncBoard() {
             if (*(board + i * values[3] + j)) {
                 glColor3f(0.0, 0.0, 0.0);
                 glBegin(GL_POLYGON);
-                glVertex2d(dx * i, dy * j);
-                glVertex2d(dx * (i + 1), dy * j);
-                glVertex2d(dx * (i + 1), dy * (j + 1));
-                glVertex2d(dx * i, dy * (j + 1));
+                glVertex2d(dx * i, dy * (values[3] - j - 1));
+                glVertex2d(dx * (i + 1), dy * (values[3] - j - 1));
+                glVertex2d(dx * (i + 1), dy * (values[3] - j + 1 - 1));
+                glVertex2d(dx * i, dy * (values[3] - j + 1 - 1));
                 glEnd();
             }
         }
@@ -62,7 +65,7 @@ void onMouseButton(int button, int state, int x, int y) {
     x /= values[1] / values[2];
     y = values[3] - y / (values[0] / values[3]) - 1;
     
-    *(board + x * values[3] + y) = (*(board + x * values[3] + y) + 1) % 2;
+    setPoint(board, values[2], values[3], x, y);
     
     display();
 }
@@ -82,13 +85,41 @@ void specialKey(int key, int x, int y) {
     display();
 }
 
+void count_turn(char* board, int x, int y) {
+    clock_t start_time = clock();
+    turn(board, values[2], values[3]);
+    clock_t delta = clock() - start_time;
+    clock_t temp = delta;
+    int length = 0, number;
+    // while (temp != 0) {
+    //     temp %= 10;
+    //     length += 1;
+    // }
+    // char string[++length];
+    // string[length--] = '\0';
+    // while (delta != 0) {
+    //     number = delta % 10;
+    //     delta %= 10;
+    //     string[length--] = number + 48;
+    // }
+
+    // char string[] = "Hello!";
+    // int bitmapLength = glutBitmapLength(GLUT_BITMAP_8_BY_13, string);
+    // glRasterPos2f(100., 100.);
+    // glColor3f(1., 0., 0.);
+    // for (int i = 0; i < strlen(string); i++)
+    //     glutBitmapCharacter(GLUT_BITMAP_8_BY_13, string[i]);
+
+    return;
+}
+
 void key(unsigned char key, int x, int y) {
     switch(key) {
         case 'q':
             exit(0);
             break;
         case 't':
-            turn(board, values[2], values[3]);
+            count_turn(board, values[2], values[3]);
             break;
         case 'g':
             setGlider(board, values[2], values[3], curX, curY);
@@ -114,7 +145,7 @@ void key(unsigned char key, int x, int y) {
 
 void tick() {
     if (!paused) {
-        turn(board, values[2], values[3]);
+        count_turn(board, values[2], values[3]);
         display();
     }
     glutTimerFunc(tickTime, tick, 0);
@@ -122,7 +153,7 @@ void tick() {
 
 void updatePos(int x, int y) {
     curX = x / (values[1] / values[2]);
-    curY = y / (values[0] / values[3]);
+    curY = values[3] - y / (values[0] / values[3]) - 1;
 }
 
 int main(int argc, char *argv[]) {
@@ -132,6 +163,8 @@ int main(int argc, char *argv[]) {
     paused = 1;
 
     values = readConfig("./data/config.conf");
+    cells = createList();
+
 
     board = (char *)malloc(sizeof(char) * values[2] * values[3]);
 	for (int i = 0; i < values[2]; i++)
