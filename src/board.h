@@ -18,7 +18,7 @@ int HEIGHT;
 /* Functions for interacting the board. */
 
 void printBoard(char *board, int x, int y);
-void turn(char *board, int x, int y);
+void (*turn)(char *, int, int);
 int setGlider(char *board, int x, int y, int posX, int posY);
 void setShattle(char *board, int x, int y, int posX, int posY);
 int setGun(char *board, int x, int y, int posX, int posY);
