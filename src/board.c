@@ -29,12 +29,15 @@ int splitInput(char *input, char **command) {
 int setPoint(char *board, int x, int y, int setX, int setY) {
 
 	if (setX < 0 || setX >= x || setY < 0 || setY >= y) return -1;
-	*(board + setX * y + y - setY - 1) = (*(board + setX * y + y - setY - 1) + 1) % 2;
 
-	if (*(board + setX * y + y - setY - 1))
-		addElement(board + setX * y + y - setY - 1, cells);
+	char *cell = board + setX * y + y - setY - 1;
+
+	*(cell) = (*(cell) + 1) % 2;
+
+	if (*(cell))
+		addElement(cell, cells);
 	else
-		return (int) removeElement(board + setX * y + y - setY - 1, cells);
+		return (int) removeElement(cell, cells);
 
 	return 0;
 }
@@ -68,9 +71,9 @@ void optimised_turn(char *board, int x, int y) {
 
 	int count;
 	char *newBoard = (char *)malloc(sizeof(char) * x * y);
-	// memset(newBoard, -1, sizeof(char) * x * y);
-	for (int i = 0; i < x * y; i++)
-		*(newBoard + i) = -1;
+	memset(newBoard, -1, sizeof(char) * x * y);
+	// for (int i = 0; i < x * y; i++)
+	// 	*(newBoard + i) = -1;
 
 	struct list *cur = cells;
 	char *cell = NULL;
@@ -83,49 +86,53 @@ void optimised_turn(char *board, int x, int y) {
 		curX = ((int) (cell - board)) / y;
 		curY = (int) (cell - (board + curX * y));
 		for (int j = -1; j < 2; j++)
-			for (int i = -1; i < 2; i++)
-				if (*(newBoard + ((curX + j) % x) * y + ((curY + i) % y)) != -1)
+			for (int i = -1; i < 2; i++) {
+				char *curcell = newBoard + ((curX + j) % x) * y + ((curY + i) % y);
+				char *oldcell = board + ((curX + j) % x) * y + ((curY + i) % y);
+				if (*(curcell) != -1)
 					continue;
 				else {
 					count = 0;
 					for (int shiftX = -1; shiftX < 2; shiftX++)
 						for (int shiftY = -1; shiftY < 2; shiftY++) {
-							*(newBoard + ((curX + j) % x) * y + ((curY + i) % y)) = 0;
+							*(curcell) = 0;
 							if (shiftY == 0 && shiftX == 0) continue;
 							if (*(board + ((curX + j + shiftX) % x) * y + ((curY + i + shiftY) % y)) == 1) count += 1;
 						}
-					if (*(board + ((curX + j) % x) * y + ((curY + i) % y))) {
+					if (*(oldcell)) {
 						if (count == 2 || count == 3) {
-							*(newBoard + ((curX + j) % x) * y + ((curY + i) % y)) = 1;
+							*(curcell) = 1;
 						} else {
-							*(newBoard + ((curX + j) % x) * y + ((curY + i) % y)) = 0;
-							removeElement(board + ((curX + j) % x) * y + ((curY + i) % y), cells);
+							*(curcell) = 0;
+							removeElement(oldcell, cells);
 						}
 					} else {
 						if (count == 3)
-							*(newBoard + ((curX + j) % x) * y + ((curY + i) % y)) = 1;
+							*(curcell) = 1;
 					}
 				}
+			}
 		cur = cur->nextElement;
 	}
 
-	// char *start = newBoard;
-	// int i;
-	// for (i = 0; i < x * y; i++)
-	// 	if (*(newBoard + i) != -1) {
-	// 		if (* (char *) start == -1)
-	// 			memset(start, 0, newBoard + i - start);
-	// 	} else
-	// 		if (* (char *) start != -1)
-	// 			start = newBoard + i;
-	// memset(start, 0, newBoard + i - start);
-	for (int i = 0; i < x * y; i++)
-		if (*(newBoard + i) == -1)
-			*(newBoard + i) = 0;
+	char *start = newBoard;
+	int i;
+	for (i = 0; i < x * y; i++)
+		if (*(newBoard + i) != -1) {
+			if (* (char *) start == -1)
+				memset(start, 0, newBoard + i - start);
+		} else
+			if (* (char *) start != -1)
+				start = newBoard + i;
+	memset(start, 0, newBoard + i - start);
+	// for (int i = 0; i < x * y; i++)
+	// 	if (*(newBoard + i) == -1)
+	// 		memset(newBoard + i, 0, 1);
+			// *(newBoard + i) = 0;
 
-	// memcpy(board, newBoard, sizeof(char) * x * y);
-	for (int i = 0; i < x * y; i++)
-		*(board + i) = *(newBoard + i);
+	memcpy(board, newBoard, sizeof(char) * x * y);
+	// for (int i = 0; i < x * y; i++)
+	// 	*(board + i) = *(newBoard + i);
 	free(newBoard);
 	return;
 }
@@ -178,6 +185,17 @@ int executeCommand(char *input, char **command, char *board, int x, int y) {
 	if ((result = splitInput(input, command)) < 0) {
 		return result - 10;
 	}
+	if (!strcmp(command[0], "turn") || !strcmp(command[0], "t")) {
+		clock_t start_time = clock();
+		turn(board, x, y);
+		clock_t end_time = clock();
+		printf("Ticks passed: %d\n", end_time - start_time);
+	}
+	if (!strcmp(command[0], "set") || !strcmp(command[0], "s"))
+		if ((result = setCommand(command, board, x, y)) < 0)
+			return result - 20;
+	if (!strcmp(command[0], "print") || !strcmp(command[0], "p"))
+		printBoard(board, x, y);
 	if (!strcmp(command[0], "algorithm") || !strcmp(command[0], "a"))
 		if (turn == old_turn) {
 			turn = optimised_turn;
@@ -188,9 +206,6 @@ int executeCommand(char *input, char **command, char *board, int x, int y) {
 			printf("Picked old turn\n");
 			return 0;
 		}
-	if (!strcmp(command[0], "set") || !strcmp(command[0], "s"))
-		if ((result = setCommand(command, board, x, y)) < 0)
-			return result - 20;
 	if (!strcmp(command[0], "glider") || !strcmp(command[0], "g")) {
 		int setX, setY;
 		if (command[1] == 0x0 || command[2] == 0x0) return -1;
@@ -211,14 +226,6 @@ int executeCommand(char *input, char **command, char *board, int x, int y) {
 		if ((result = setGun(board, WIDTH, HEIGHT, setX, setY)) < 0)
 			return result - 20;
 	}
-	if (!strcmp(command[0], "turn") || !strcmp(command[0], "t")) {
-		clock_t start_time = clock();
-		turn(board, x, y);
-		clock_t end_time = clock();
-		printf("Ticks passed: %d\n", end_time - start_time);
-	}
-	if (!strcmp(command[0], "print") || !strcmp(command[0], "p"))
-		printBoard(board, x, y);
 	return 0;
 }
 
