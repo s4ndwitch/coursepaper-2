@@ -1,3 +1,6 @@
+
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,7 +9,14 @@
 #include "helper.h"
 #include "config.h"
 
+
+/*
+    Reads a config file by given name and returns
+    an array of ints: the height and width of a cell,
+    number of cells in a row and a column.
+*/
 int *readConfig(char *fileName) {
+
     FILE *configFile = fopen(fileName, "r");
     if (configFile == NULL) {
         fprintf(stderr, "Could not open config file\n");
@@ -51,3 +61,4 @@ int *readConfig(char *fileName) {
     fclose(configFile);
     return result;
 }
+

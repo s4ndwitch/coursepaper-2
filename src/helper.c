@@ -4,6 +4,11 @@
 #include "helper.h"
 #include "list.h"
 
+
+/*
+	Parses given string for a positive number.
+	Returns -1 else.
+*/
 int parseInt(char *number) {
 	int result = 0;
 	int digit = 1;
@@ -47,6 +52,9 @@ int parseInt(char *number) {
 	return result;
 }
 
+/*
+	Splits input into an array of strings by a delimiter.
+*/
 int split(char *input, char splitSymbol, char **result) {
 
     char *symbol = (char *)malloc(sizeof(char) * 1);
@@ -84,3 +92,4 @@ int split(char *input, char splitSymbol, char **result) {
 
     return length;
 }
+
